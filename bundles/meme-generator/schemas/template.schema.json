@@ -1,0 +1,134 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "templates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Nombre único de la plantilla"
+          },
+          "description": {
+            "type": "string",
+            "description": "Descripción de la plantilla"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["comparison", "reaction", "dilemma", "opinion"],
+            "description": "Categoría de la plantilla"
+          },
+          "popularity": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "description": "Nivel de popularidad (1-10)"
+          },
+          "dimensions": {
+            "type": "object",
+            "properties": {
+              "width": {
+                "type": "integer",
+                "description": "Ancho recomendado en píxeles"
+              },
+              "height": {
+                "type": "integer",
+                "description": "Alto recomendado en píxeles"
+              }
+            }
+          },
+          "textAreas": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "enum": ["top", "bottom"],
+                  "description": "Nombre del área de texto"
+                },
+                "x": {
+                  "type": "integer",
+                  "description": "Posición X del área de texto"
+                },
+                "y": {
+                  "type": "integer",
+                  "description": "Posición Y del área de texto"
+                },
+                "width": {
+                  "type": "integer",
+                  "description": "Ancho del área de texto"
+                },
+                "height": {
+                  "type": "integer",
+                  "description": "Alto del área de texto"
+                },
+                "required": {
+                  "type": "boolean",
+                  "description": "Si el área de texto es requerida"
+                }
+              },
+              "required": ["name", "x", "y", "width", "height", "required"]
+            }
+          },
+          "example": {
+            "type": "object",
+            "properties": {
+              "topText": {
+                "type": "string",
+                "description": "Ejemplo de texto superior"
+              },
+              "bottomText": {
+                "type": "string",
+                "description": "Ejemplo de texto inferior"
+              }
+            }
+          }
+        },
+        "required": ["name", "description", "category", "popularity"]
+      }
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Nombre de la categoría"
+          },
+          "description": {
+            "type": "string",
+            "description": "Descripción de la categoría"
+          },
+          "count": {
+            "type": "integer",
+            "description": "Número de plantillas en esta categoría"
+          }
+        },
+        "required": ["name", "description", "count"]
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "totalTemplates": {
+          "type": "integer",
+          "description": "Número total de plantillas"
+        },
+        "lastUpdated": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Última actualización del recurso"
+        },
+        "version": {
+          "type": "string",
+          "description": "Versión del esquema de plantillas"
+        }
+      }
+    }
+  },
+  "required": ["templates", "categories", "metadata"]
+}

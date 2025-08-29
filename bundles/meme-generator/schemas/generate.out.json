@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "meme": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "ID único del meme generado"
+        },
+        "template": {
+          "type": "string",
+          "description": "Plantilla utilizada"
+        },
+        "topText": {
+          "type": "string",
+          "description": "Texto superior"
+        },
+        "bottomText": {
+          "type": "string",
+          "description": "Texto inferior"
+        },
+        "style": {
+          "type": "string",
+          "description": "Estilo del texto aplicado"
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL de la imagen del meme generado"
+        },
+        "asciiArt": {
+          "type": "string",
+          "description": "Versión ASCII del meme (para consola)"
+        }
+      },
+      "required": ["id", "template", "topText", "style", "asciiArt"]
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "processingTime": {
+          "type": "number",
+          "description": "Tiempo de procesamiento en milisegundos"
+        },
+        "funnyLevel": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10,
+          "description": "Nivel de gracia del meme (1-10)"
+        }
+      }
+    }
+  },
+  "required": ["meme", "metadata"]
+}

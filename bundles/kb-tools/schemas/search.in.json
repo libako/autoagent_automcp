@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["query"],
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "Consulta de búsqueda",
+      "minLength": 1,
+      "maxLength": 1000
+    },
+    "limit": {
+      "type": "integer",
+      "description": "Número máximo de resultados",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 10
+    },
+    "filters": {
+      "type": "object",
+      "description": "Filtros adicionales para la búsqueda",
+      "properties": {
+        "category": {
+          "type": "string",
+          "description": "Categoría de documentos"
+        },
+        "dateFrom": {
+          "type": "string",
+          "format": "date",
+          "description": "Fecha de inicio para filtrar"
+        },
+        "dateTo": {
+          "type": "string",
+          "format": "date",
+          "description": "Fecha de fin para filtrar"
+        }
+      }
+    }
+  }
+}

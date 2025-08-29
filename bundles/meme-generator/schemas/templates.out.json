@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "templates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Nombre de la plantilla"
+          },
+          "description": {
+            "type": "string",
+            "description": "Descripción de la plantilla"
+          },
+          "category": {
+            "type": "string",
+            "description": "Categoría del meme"
+          },
+          "popularity": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "description": "Nivel de popularidad (1-10)"
+          },
+          "example": {
+            "type": "object",
+            "properties": {
+              "topText": {
+                "type": "string"
+              },
+              "bottomText": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": ["name", "description", "category", "popularity"]
+      }
+    },
+    "total": {
+      "type": "integer",
+      "description": "Número total de plantillas disponibles"
+    }
+  },
+  "required": ["templates", "total"]
+}

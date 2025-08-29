@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "results": {
+      "type": "array",
+      "description": "Lista de resultados de búsqueda",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID único del documento"
+          },
+          "title": {
+            "type": "string",
+            "description": "Título del documento"
+          },
+          "content": {
+            "type": "string",
+            "description": "Contenido del documento"
+          },
+          "category": {
+            "type": "string",
+            "description": "Categoría del documento"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Fecha de creación"
+          },
+          "score": {
+            "type": "number",
+            "description": "Puntuación de relevancia",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "required": ["id", "title", "content", "score"]
+      }
+    },
+    "total": {
+      "type": "integer",
+      "description": "Número total de resultados encontrados",
+      "minimum": 0
+    },
+    "query": {
+      "type": "string",
+      "description": "Consulta original"
+    },
+    "executionTime": {
+      "type": "number",
+      "description": "Tiempo de ejecución en milisegundos"
+    }
+  },
+  "required": ["results", "total", "query"]
+}

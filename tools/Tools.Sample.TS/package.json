@@ -1,0 +1,20 @@
+{
+  "name": "mcp-tools-sample-ts",
+  "version": "1.0.0",
+  "description": "Ejemplo de herramientas MCP en TypeScript",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}

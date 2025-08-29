@@ -1,0 +1,61 @@
+{
+  "name": "kb-tools",
+  "namespace": "kb",
+  "version": "1.2.0",
+  "protocol": "1.1",
+  "tools": [
+    {
+      "name": "search",
+      "runtime": "node18",
+      "entry": "tools/search.js",
+      "inputSchema": "schemas/search.in.json",
+      "outputSchema": "schemas/search.out.json",
+      "permissions": {
+        "net": ["https://docs.local"],
+        "fs": ["/data/kb:ro"]
+      },
+      "limits": {
+        "timeoutMs": 1500,
+        "memMB": 128
+      },
+      "metadata": {
+        "description": "Busca en la base de conocimientos",
+        "category": "search"
+      }
+    },
+    {
+      "name": "summarize",
+      "runtime": "node18",
+      "entry": "tools/summarize.js",
+      "inputSchema": "schemas/summarize.in.json",
+      "outputSchema": "schemas/summarize.out.json",
+      "permissions": {
+        "net": ["https://api.openai.com"],
+        "fs": ["/data/kb:ro"]
+      },
+      "limits": {
+        "timeoutMs": 5000,
+        "memMB": 256
+      },
+      "metadata": {
+        "description": "Genera resúmenes de documentos",
+        "category": "nlp"
+      }
+    }
+  ],
+  "resources": [
+    {
+      "name": "documents",
+      "schema": "schemas/documents.json",
+      "metadata": {
+        "description": "Esquema de documentos en la base de conocimientos"
+      }
+    }
+  ],
+  "policies": ["policies/allowlist.rego"],
+  "metadata": {
+    "description": "Herramientas para gestión de base de conocimientos",
+    "author": "MCP AutoServer Team",
+    "tags": ["knowledge", "search", "nlp"]
+  }
+}

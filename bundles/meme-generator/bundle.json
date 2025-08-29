@@ -1,0 +1,49 @@
+{
+  "name": "Meme Generator",
+  "namespace": "meme",
+  "version": "1.0.0",
+  "protocol": "1.1",
+  "tools": [
+    {
+      "name": "generate",
+      "runtime": "node18",
+      "entry": "tools/generate.js",
+      "inputSchema": "schemas/generate.in.json",
+      "outputSchema": "schemas/generate.out.json",
+      "metadata": {
+        "description": "Genera un meme aleatorio basado en una plantilla y texto personalizado"
+      },
+      "limits": {
+        "timeoutMs": 5000,
+        "memMB": 128
+      }
+    },
+    {
+      "name": "templates",
+      "runtime": "node18",
+      "entry": "tools/templates.js",
+      "outputSchema": "schemas/templates.out.json",
+      "metadata": {
+        "description": "Lista todas las plantillas de memes disponibles"
+      },
+      "limits": {
+        "timeoutMs": 2000,
+        "memMB": 64
+      }
+    }
+  ],
+  "resources": [
+    {
+      "name": "templates",
+      "schema": "schemas/template.schema.json",
+      "metadata": {
+        "description": "Plantillas de memes disponibles"
+      }
+    }
+  ],
+  "metadata": {
+    "description": "Generador de memes divertidos",
+    "author": "MCP AutoServer Team",
+    "tags": ["fun", "memes", "entertainment"]
+  }
+}
