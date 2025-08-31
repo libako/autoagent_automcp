@@ -1,15 +1,30 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Mcp.Abstractions;
 
 /// <summary>
 /// Contratos JSON-RPC 2.0 para el protocolo MCP
 /// </summary>
-public record JsonRpcRequest(string Jsonrpc, string Method, JsonElement? Params, string Id);
+public record JsonRpcRequest(
+    [property: JsonPropertyName("jsonrpc")] string Jsonrpc, 
+    [property: JsonPropertyName("method")] string Method, 
+    [property: JsonPropertyName("params")] JsonElement? Params, 
+    [property: JsonPropertyName("id")] JsonElement? Id
+);
 
-public record JsonRpcResponse(string Jsonrpc, JsonElement? Result, JsonRpcError? Error, string Id);
+public record JsonRpcResponse(
+    [property: JsonPropertyName("jsonrpc")] string Jsonrpc, 
+    [property: JsonPropertyName("result")] JsonElement? Result, 
+    [property: JsonPropertyName("error")] JsonRpcError? Error, 
+    [property: JsonPropertyName("id")] JsonElement? Id
+);
 
-public record JsonRpcError(int Code, string Message, JsonElement? Data);
+public record JsonRpcError(
+    [property: JsonPropertyName("code")] int Code, 
+    [property: JsonPropertyName("message")] string Message, 
+    [property: JsonPropertyName("data")] JsonElement? Data
+);
 
 /// <summary>
 /// Parámetros para el método initialize del protocolo MCP

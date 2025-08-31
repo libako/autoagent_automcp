@@ -135,44 +135,17 @@ public class BundleLoader : BackgroundService
     public IReadOnlyDictionary<string, LoadedBundle> Bundles => _bundles;
 
     /// <summary>
-    /// Obtiene una herramienta específica
+    /// Obtiene la ruta de un bundle por su namespace
     /// </summary>
-    public ToolSpec? GetTool(string namespaceName, string toolName)
+    public string? GetBundlePath(string namespaceName)
     {
-        // Buscar el bundle por namespace
-        foreach (var bundle in _bundles.Values)
+        if (_bundles.TryGetValue(namespaceName, out var bundle))
         {
-            if (bundle.Manifest.Namespace == namespaceName)
-            {
-                var toolKey = $"{namespaceName}.{toolName}";
-                if (bundle.Tools.TryGetValue(toolKey, out var tool))
-                {
-                    return tool;
-                }
-            }
+            return bundle.BundlePath;
         }
         return null;
     }
 
-    /// <summary>
-    /// Obtiene un recurso específico
-    /// </summary>
-    public ResourceSpec? GetResource(string namespaceName, string resourceName)
-    {
-        // Buscar el bundle por namespace
-        foreach (var bundle in _bundles.Values)
-        {
-            if (bundle.Manifest.Namespace == namespaceName)
-            {
-                var resourceKey = $"{namespaceName}.{resourceName}";
-                if (bundle.Resources.TryGetValue(resourceKey, out var resource))
-                {
-                    return resource;
-                }
-            }
-        }
-        return null;
-    }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -343,6 +316,38 @@ public class BundleLoader : BackgroundService
         {
             _reloadSemaphore.Release();
         }
+    }
+
+    /// <summary>
+    /// Obtiene una herramienta específica por namespace y nombre
+    /// </summary>
+    public ToolSpec? GetTool(string namespaceName, string toolName)
+    {
+        if (_bundles.TryGetValue(namespaceName, out var bundle))
+        {
+            var toolKey = $"{namespaceName}.{toolName}";
+            if (bundle.Tools.TryGetValue(toolKey, out var tool))
+            {
+                return tool;
+            }
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Obtiene un recurso específico por namespace y nombre
+    /// </summary>
+    public ResourceSpec? GetResource(string namespaceName, string resourceName)
+    {
+        if (_bundles.TryGetValue(namespaceName, out var bundle))
+        {
+            var resourceKey = $"{namespaceName}.{resourceName}";
+            if (bundle.Resources.TryGetValue(resourceKey, out var resource))
+            {
+                return resource;
+            }
+        }
+        return null;
     }
 
     public override void Dispose()

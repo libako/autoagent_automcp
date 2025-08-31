@@ -41,27 +41,27 @@ builder.Services.AddHostedService<DiscoveryService>(provider => provider.GetRequ
 // Servicios del servidor
 builder.Services.AddSingleton<McpRouter>();
 
-// Autenticación (opcional)
-builder.Services.AddAuthentication()
-    .AddJwtBearer(options =>
-    {
-        // Configurar JWT si es necesario
-        options.RequireHttpsMetadata = false;
-        options.SaveToken = true;
-    });
+// Autenticación (opcional) - COMENTADO PARA DEBUG
+// builder.Services.AddAuthentication()
+//     .AddJwtBearer(options =>
+//     {
+//         // Configurar JWT si es necesario
+//         options.RequireHttpsMetadata = false;
+//         options.SaveToken = true;
+//     });
 
-builder.Services.AddAuthorization();
+// builder.Services.AddAuthorization();
 
-// Rate limiting
-builder.Services.AddRateLimiter(options =>
-{
-    options.AddFixedWindowLimiter("ws", limiterOptions =>
-    {
-        limiterOptions.PermitLimit = 200;
-        limiterOptions.Window = TimeSpan.FromMinutes(1);
-        limiterOptions.QueueLimit = 0;
-    });
-});
+// Rate limiting - COMENTADO PARA DEBUG
+// builder.Services.AddRateLimiter(options =>
+// {
+//     options.AddFixedWindowLimiter("ws", limiterOptions =>
+//     {
+//         limiterOptions.PermitLimit = 200;
+//         limiterOptions.Window = TimeSpan.FromMinutes(1);
+//         limiterOptions.QueueLimit = 0;
+//     });
+// });
 
 // OpenTelemetry
 builder.Services.AddOpenTelemetry()
@@ -77,10 +77,17 @@ builder.Services.AddOpenTelemetry()
 
 var app = builder.Build();
 
-// Configurar pipeline HTTP
-app.UseAuthentication();
-app.UseAuthorization();
-app.UseRateLimiter();
+// Habilitar WebSocket explícitamente
+app.UseWebSockets(new WebSocketOptions
+{
+    KeepAliveInterval = TimeSpan.FromMinutes(2),
+    ReceiveBufferSize = 4 * 1024
+});
+
+// Configurar pipeline HTTP (comentado temporalmente para debug)
+// app.UseAuthentication();
+// app.UseAuthorization();
+// app.UseRateLimiter();
 
 // Endpoint de descubrimiento .well-known/mcp
 app.MapGet("/.well-known/mcp", (DiscoveryService discoveryService) =>
@@ -191,6 +198,13 @@ app.MapPost("/tools/{namespace}.{tool}:invoke", async (string namespaceName, str
             return Results.NotFound(new { error = $"Herramienta {namespaceName}.{toolName} no encontrada" });
         }
 
+        // Obtener la ruta del bundle para pasar al runtime
+        var bundlePath = bundleLoader.GetBundlePath(namespaceName);
+        if (string.IsNullOrEmpty(bundlePath))
+        {
+            return Results.BadRequest(new { error = $"Bundle path not found for namespace '{namespaceName}'" });
+        }
+
         // Leer el cuerpo de la solicitud
         using var reader = new StreamReader(context.Request.Body);
         var requestBody = await reader.ReadToEndAsync();
@@ -206,7 +220,7 @@ app.MapPost("/tools/{namespace}.{tool}:invoke", async (string namespaceName, str
         }
 
         // Ejecutar la herramienta
-        var result = await runtimeManager.ExecuteToolAsync(tool, arguments, context.RequestAborted);
+        var result = await runtimeManager.ExecuteToolAsync(tool, arguments, bundlePath, context.RequestAborted);
         
         return Results.Json(new
         {
@@ -262,14 +276,42 @@ app.Map("/ws-test", async (HttpContext context) =>
 // Endpoint WebSocket MCP (sin autenticación para pruebas)
 app.Map("/ws", async (HttpContext context, McpRouter router) =>
 {
-    if (!context.WebSockets.IsWebSocketRequest)
+    try
     {
-        context.Response.StatusCode = 400;
-        return;
-    }
+        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+        logger.LogInformation("Solicitud WebSocket recibida en /ws");
+        logger.LogInformation("Headers: {Headers}", string.Join(", ", context.Request.Headers.Select(h => $"{h.Key}={h.Value}")));
+        
+        // Verificar manualmente si es una solicitud WebSocket
+        var isWebSocketRequest = context.Request.Headers.ContainsKey("Upgrade") &&
+                                context.Request.Headers["Upgrade"].ToString().ToLower() == "websocket" &&
+                                context.Request.Headers.ContainsKey("Connection") &&
+                                context.Request.Headers["Connection"].ToString().ToLower().Contains("upgrade");
+        
+        if (!isWebSocketRequest)
+        {
+            logger.LogWarning("No es una solicitud WebSocket válida (verificación manual)");
+            context.Response.StatusCode = 400;
+            await context.Response.WriteAsync("Bad Request: WebSocket upgrade required");
+            return;
+        }
 
-    using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
-    await router.HandleAsync(webSocket, context.RequestAborted);
+        logger.LogInformation("Aceptando conexión WebSocket...");
+        var webSocket = await context.WebSockets.AcceptWebSocketAsync();
+        logger.LogInformation("Conexión WebSocket aceptada, iniciando manejo...");
+        await router.HandleAsync(webSocket, context.RequestAborted);
+    }
+    catch (Exception ex)
+    {
+        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Error en endpoint WebSocket /ws");
+        
+        if (!context.Response.HasStarted)
+        {
+            context.Response.StatusCode = 500;
+            await context.Response.WriteAsync($"Internal Server Error: {ex.Message}");
+        }
+    }
 })
 .AllowAnonymous();
 

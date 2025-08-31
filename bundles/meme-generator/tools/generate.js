@@ -19,8 +19,8 @@ const memeTemplates = {
       '    ║  😎  NO                                  😎  YES         ║',
       '    ║                                                          ║',
       '    ║  ┌─────────────────┐                    ┌─────────────────┐',
-      '    ║  │                 │                    │                 │',
-      '    ║  │   [TOP TEXT]    │                    │  [BOTTOM TEXT]  │',
+      '    ║  │                 │                    │  [BOTTOM TEXT]  │',
+      '    ║  │   [TOP TEXT]    │                    │                 │',
       '    ║  │                 │                    │                 │',
       '    ║  └─────────────────┘                    └─────────────────┘',
       '    ║                                                          ║',
@@ -98,14 +98,12 @@ const memeTemplates = {
 
 // Estilos de texto
 const textStyles = {
-  'classic': (text) => `[${text}]`,
   'impact': (text) => `**${text}**`,
+  'classic': (text) => `[${text}]`,
   'comic': (text) => `"${text}"`,
-  'random': (text) => {
-    const styles = ['classic', 'impact', 'comic'];
-    const randomStyle = styles[Math.floor(Math.random() * styles.length)];
-    return textStyles[randomStyle](text);
-  }
+  'bold': (text) => `**${text}**`,
+  'italic': (text) => `*${text}*`,
+  'underline': (text) => `__${text}__`
 };
 
 // Generar ID único
@@ -113,7 +111,7 @@ function generateId() {
   return 'meme_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 }
 
-// Calcular nivel de gracia (algoritmo muy científico 😄)
+// Calcular nivel de gracia
 function calculateFunnyLevel(topText, bottomText, template) {
   let score = 5; // Base
   
@@ -136,17 +134,26 @@ function calculateFunnyLevel(topText, bottomText, template) {
   return Math.min(10, Math.max(1, score));
 }
 
-// Procesar la entrada
+// Procesar la entrada de manera más robusta
 let inputData = '';
 
-rl.on('line', (line) => {
-  inputData += line;
+// Leer toda la entrada de una vez
+process.stdin.setEncoding('utf8');
+process.stdin.on('data', (chunk) => {
+  inputData += chunk;
 });
 
-rl.on('close', () => {
+process.stdin.on('end', () => {
   try {
     const startTime = Date.now();
-    const input = JSON.parse(inputData);
+    
+    // Limpiar la entrada y parsear JSON
+    const cleanInput = inputData.trim();
+    if (!cleanInput) {
+      throw new Error('No se recibió entrada');
+    }
+    
+    const input = JSON.parse(cleanInput);
     
     // Validar entrada
     if (!input.topText) {
@@ -212,4 +219,13 @@ rl.on('close', () => {
     }, null, 2));
     process.exit(1);
   }
+});
+
+// Manejar errores de stdin
+process.stdin.on('error', (error) => {
+  console.error(JSON.stringify({
+    error: `Error de stdin: ${error.message}`,
+    timestamp: new Date().toISOString()
+  }, null, 2));
+  process.exit(1);
 });

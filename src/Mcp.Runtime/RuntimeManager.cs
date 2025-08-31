@@ -27,7 +27,7 @@ public class RuntimeManager
     /// <summary>
     /// Ejecuta una herramienta usando el runtime apropiado
     /// </summary>
-    public async Task<ToolInvokeResult> ExecuteToolAsync(ToolSpec tool, JsonElement arguments, CancellationToken cancellationToken = default)
+    public async Task<ToolInvokeResult> ExecuteToolAsync(ToolSpec tool, JsonElement arguments, string? bundlePath = null, CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("Ejecutando herramienta: {ToolName} con runtime {Runtime}", tool.Name, tool.Runtime);
 
@@ -57,19 +57,39 @@ public class RuntimeManager
 
         try
         {
-            var result = await selectedRuntime.InvokeAsync(tool, arguments, cancellationToken);
-            
-            if (result.IsError)
+            // Si el runtime soporta bundlePath, pasarlo
+            if (selectedRuntime is SubprocessRuntime subprocessRuntime && !string.IsNullOrEmpty(bundlePath))
             {
-                _logger.LogError("Error ejecutando herramienta {ToolName}: {Error}", tool.Name, result.ErrorMessage);
+                var result = await subprocessRuntime.InvokeAsync(tool, arguments, bundlePath, cancellationToken);
+                
+                if (result.IsError)
+                {
+                    _logger.LogError("Error ejecutando herramienta {ToolName}: {Error}", tool.Name, result.ErrorMessage);
+                }
+                else
+                {
+                    _logger.LogDebug("Herramienta {ToolName} ejecutada exitosamente en {ElapsedMs}ms", 
+                        tool.Name, result.ExecutionTime.TotalMilliseconds);
+                }
+                
+                return result;
             }
             else
             {
-                _logger.LogDebug("Herramienta {ToolName} ejecutada exitosamente en {ElapsedMs}ms", 
-                    tool.Name, result.ExecutionTime.TotalMilliseconds);
+                var result = await selectedRuntime.InvokeAsync(tool, arguments, cancellationToken);
+                
+                if (result.IsError)
+                {
+                    _logger.LogError("Error ejecutando herramienta {ToolName}: {Error}", tool.Name, result.ErrorMessage);
+                }
+                else
+                {
+                    _logger.LogDebug("Herramienta {ToolName} ejecutada exitosamente en {ElapsedMs}ms", 
+                        tool.Name, result.ExecutionTime.TotalMilliseconds);
+                }
+                
+                return result;
             }
-            
-            return result;
         }
         catch (Exception ex)
         {
